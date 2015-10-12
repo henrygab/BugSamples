@@ -14,7 +14,7 @@
 ///     [Pure]                   // Just for fun...
 /// </summary>
 
-namespace Sample1
+namespace SpuriousWarningCC1075
 {
     [K.ContractClass(typeof(ContractsForIFoo))]
     public interface IFoo

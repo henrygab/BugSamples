@@ -1,20 +1,86 @@
-﻿using K = System.Diagnostics.Contracts;
+﻿using System;
+using K = System.Diagnostics.Contracts;
 
 /// <summary>
-/// Building produces the following error:
-/// Class1.cs(xx,13): warning CC1075:
-///     CodeContracts: Contract class 'Sample1.ContractsForIFoo' references member
-///     'Sample1.ContractsForIFoo.ValidateColumnUnchanged' which is not part of
-///     the abstract class/interface being annotated.
-/// There does not appear to be any way to markup the function in this class to
-/// prevent this warning message.  None of the following attributes prevent this
-/// warning either:
-///     [ContractAbbreviator]    // This is the one that should work
-///     [ContractRuntimeIgnored] // not intended purpose
-///     [Pure]                   // Just for fun...
+/// Three bugs shown in this simple example.
+/// 
+/// Issue:
+/// Contracts within ContractInvariantMethod method fail to be inherited via autoproperties in ContractClassFor() class
+/// 
+/// Steps to Repro:
+/// Build this project.  :)
+/// 
+/// Expected Results:
+/// Per section 2.3.1 of Code Contracts Specification:
+///     Invariants on automatic properties SHALL add Ensures/Requires
+///     to the corresponding Get/Set.
+/// Therefore, the expectation is that the Ensures/Requires
+/// corresponding to anything listed in a ContractInvariantMethod attributed
+/// function will be applied to the autoproperties, and thus inherited for
+/// any implementation.
+///
+/// Actual Results:
+/// Code Contracts fails to detect / report any problems with the below code,
+/// which suggests either the contract is not being detected at all, or is
+/// somehow getting lost....
+/// 
+/// 
+/// 
+/// 
+/// 
+/// Issue:
+/// Contracts within ContractAbbreviator method fail to be inherited from ContractClassFor() class
+/// 
+/// Steps to Repro:
+/// Build this project.  :)
+/// 
+/// Expected Results:
+/// Per section 2.3.1 of Code Contracts Specification:
+///     Invariants on automatic properties SHALL add Ensures/Requires
+///     to the corresponding Get/Set.
+/// Therefore, the expectation is that the Ensures/Requires
+/// corresponding to anything listed in a ContractInvariantMethod attributed
+/// function will be applied to the autoproperties, and thus inherited for
+/// any implementation.
+///
+/// Actual Results:
+/// Code Contracts fails to detect / report any problems with the below code,
+/// which suggests either the contract is not being detected at all, or is
+/// somehow getting lost....
+/// 
+/// 
+/// 
+/// 
+/// 
+/// 
+/// 
+/// Issue:
+/// Contracts within ContractInvariantMethod method fail to be inherited via autoproperties in ContractClassFor() class
+/// 
+/// Steps to Repro:
+/// Build this project.  :)
+/// 
+/// Expected Results:
+/// Per section 2.3.1 of Code Contracts Specification:
+///     Invariants on automatic properties SHALL add Ensures/Requires
+///     to the corresponding Get/Set.
+/// Therefore, the expectation is that the Ensures/Requires
+/// corresponding to anything listed in a ContractInvariantMethod attributed
+/// function will be applied to the autoproperties, and thus inherited for
+/// any implementation.
+///
+/// Actual Results:
+/// Code Contracts fails to detect / report any problems with the below code,
+/// which suggests either the contract is not being detected at all, or is
+/// somehow getting lost....
+/// 
+/// 
+/// 
+/// 
+/// 
 /// </summary>
 
-namespace Sample1
+namespace ContractClassFor001
 {
     [K.ContractClass(typeof(ContractsForIFoo))]
     public interface IFoo
@@ -38,6 +104,12 @@ namespace Sample1
             get;
         }
 
+        /// <summary>
+        /// Per section 2.3.1 of Code Contracts Specification,
+        /// Invariants on automatic properties will add Ensures/Requires
+        /// to the corresponding Get/Set.
+        /// ***** This functionality FAILS TO WORK for ContractClassFor() classes *****
+        /// </summary>
         [K.ContractInvariantMethod()]
         private void Invariants()
         {
@@ -47,7 +119,6 @@ namespace Sample1
         }
         [K.ContractAbbreviator]
         [K.Pure]
-        //[K.ContractRuntimeIgnored]
         public void ValidateColumnUnchanged()
         {
             K.Contract.Ensures(
@@ -57,11 +128,92 @@ namespace Sample1
         }
         void IFoo.Bar()
         {
+            // NOTE: can uncomment these two lines to prove that inline code contracts are still being inherited
+            // K.Contract.Requires(((IFoo)this).CurrentColumn == 0);
+            // K.Contract.Ensures(((IFoo)this).CurrentColumn == 0);
+
             // Should this warning emit at all on an internal abstract class
             // with the "ContractClassFor(typeof(IInterface)" attribute?
             ValidateColumnUnchanged();
             return;
         }
     }
+
+
+    public sealed partial class Foo : IFoo
+    {
+        private int m_CurrentColumn;
+        private int m_TotalColumns;
+
+        public Foo()
+        {
+            m_CurrentColumn = 0;
+
+            // the following line should cause a contract validation failure.
+            // the contract is found in class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
+            //      See the Invariants() function, which has attribute [ContractInvariantMethod]
+            //      and which internally specifies that TotalColumns must always be exactly 80.
+            m_TotalColumns = 1000;
+        }
+
+        public int CurrentColumn
+        {
+            get
+            {
+                return m_CurrentColumn;
+            }
+
+            set
+            {
+                // this is not guaranteed by default code contracts(!)
+                m_CurrentColumn = value;
+            }
+        }
+
+        public int TotalColumns
+        {
+            get
+            {
+                return m_TotalColumns;
+            }
+            private set
+            {
+                m_TotalColumns = value;
+            }
+
+        }
+
+        public void Bar()
+        {
+            // the following line should cause a contract validation failure.
+            // the contract is found in class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
+            //      See the Invariants() function, which has attribute [ContractInvariantMethod]
+            //      and which internally specifies that TotalColumns must always be exactly 80.
+            m_TotalColumns = 120;
+
+            // the following line should cause a contract validation failure.
+            // the contract is found in class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
+            //      See the function Bar() defined there, which calls ValidateColumnUnchanged().
+            //      ValidateColumnUnchanged() has attribute [ContractAbbreviator]
+            //      and which internally specifies that CurrentColumn may not be modified by the Bar() function.
+            //      Accordingly, the ValidateColumnUnchanged() contract should "flow through" 
+            //      to the Bar() function that calls it, and thus flag the below line as an error
+            //      because it violates this contract.
+            m_CurrentColumn = Math.Min(50, m_CurrentColumn + 8);
+        }
+
+        public void DoSomethingElse()
+        {
+            var t = new Foo();
+            t.Bar();
+            t.CurrentColumn = 10;
+            t.Bar();
+            t.CurrentColumn = 100;
+            t.Bar();
+            t.CurrentColumn = 0;
+            t.Bar();
+        }
+    }
+
 }
 

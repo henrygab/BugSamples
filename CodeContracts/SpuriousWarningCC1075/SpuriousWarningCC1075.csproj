@@ -7,8 +7,8 @@
     <ProjectGuid>{C212233F-D447-4290-913E-A50083FDB392}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sample1</RootNamespace>
-    <AssemblyName>Sample1</AssemblyName>
+    <RootNamespace>SpuriousWarningCC1075</RootNamespace>
+    <AssemblyName>SpuriousWarningCC1075</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>

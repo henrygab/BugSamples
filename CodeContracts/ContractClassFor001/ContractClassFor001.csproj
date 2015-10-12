@@ -7,8 +7,8 @@
     <ProjectGuid>{AA77B130-CF32-4FFC-87A4-B1DA53DA0773}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sample1</RootNamespace>
-    <AssemblyName>Sample1</AssemblyName>
+    <RootNamespace>ContractClassFor001</RootNamespace>
+    <AssemblyName>ContractClassFor001</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
