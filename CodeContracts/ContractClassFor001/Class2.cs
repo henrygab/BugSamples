@@ -55,7 +55,7 @@ using K = System.Diagnostics.Contracts;
 /// 
 /// 
 /// Issue:
-/// Contracts within ContractInvariantMethod method fail to be inherited via autoproperties in ContractClassFor() class
+/// Contracts within ContractInvariantMethod method fail to be inherited in ContractClassFor() class
 /// 
 /// Steps to Repro:
 /// Build this project.  :)
