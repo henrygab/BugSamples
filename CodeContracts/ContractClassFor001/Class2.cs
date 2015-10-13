@@ -2,7 +2,7 @@
 using K = System.Diagnostics.Contracts;
 
 /// <summary>
-/// Three bugs shown in this simple example.
+/// Two bugs shown in this simple example.
 /// 
 /// Issue:
 /// Contracts within ContractInvariantMethod method fail to be inherited via autoproperties in ContractClassFor() class
@@ -47,34 +47,6 @@ using K = System.Diagnostics.Contracts;
 /// Code Contracts fails to detect / report any problems with the below code,
 /// which suggests either the contract is not being detected at all, or is
 /// somehow getting lost....
-/// 
-/// 
-/// 
-/// 
-/// 
-/// 
-/// 
-/// Issue:
-/// Contracts within ContractInvariantMethod method fail to be inherited in ContractClassFor() class
-/// 
-/// Steps to Repro:
-/// Build this project.  :)
-/// 
-/// Expected Results:
-/// Per section 2.3.1 of Code Contracts Specification:
-///     Invariants on automatic properties SHALL add Ensures/Requires
-///     to the corresponding Get/Set.
-/// Therefore, the expectation is that the Ensures/Requires
-/// corresponding to anything listed in a ContractInvariantMethod attributed
-/// function will be applied to the autoproperties, and thus inherited for
-/// any implementation.
-///
-/// Actual Results:
-/// Code Contracts fails to detect / report any problems with the below code,
-/// which suggests either the contract is not being detected at all, or is
-/// somehow getting lost....
-/// 
-/// 
 /// 
 /// 
 /// 
@@ -186,20 +158,22 @@ namespace ContractClassFor001
         public void Bar()
         {
             // the following line should cause a contract validation failure.
-            // the contract is found in class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
-            //      See the Invariants() function, which has attribute [ContractInvariantMethod]
-            //      and which internally specifies that TotalColumns must always be exactly 80.
-            m_TotalColumns = 120;
+            //      See class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
+            //      See ContractsForIFoo.Invariants(), which has attribute [ContractInvariantMethod]
+            //          and which includes the contract that TotalColumns must always be exactly 80.
+            this.TotalColumns = 120;
 
-            // the following line should cause a contract validation failure.
-            // the contract is found in class ContractsForIFoo, which has attribute [ContractClassFor(typeof(IFoo))]
-            //      See the function Bar() defined there, which calls ValidateColumnUnchanged().
-            //      ValidateColumnUnchanged() has attribute [ContractAbbreviator]
-            //      and which internally specifies that CurrentColumn may not be modified by the Bar() function.
+            // the following line should cause a contract validation failure:
+            //      See class ContractsForIFoo, specifically the attribute [ContractClassFor(typeof(IFoo))]
+            //      See ContractsForIFoo.Bar(), which calls ValidateColumnUnchanged().
+            //      ValidateColumnUnchanged() has attribute [ContractAbbreviator], which
+            //          specifies that CurrentColumn SHALL NOT be modified by Bar().
+            //
             //      Accordingly, the ValidateColumnUnchanged() contract should "flow through" 
-            //      to the Bar() function that calls it, and thus flag the below line as an error
-            //      because it violates this contract.
-            m_CurrentColumn = Math.Min(50, m_CurrentColumn + 8);
+            //          to the Bar() function that calls it
+            //      Because of code contract inheritance, the below line should be flagged as an error
+            //          for violating the contracts specified in ValidateColumnUnchanged().
+            this.CurrentColumn = Math.Min(50, m_CurrentColumn + 8);
         }
 
         public void DoSomethingElse()
