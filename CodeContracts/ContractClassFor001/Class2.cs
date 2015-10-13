@@ -35,13 +35,7 @@ using K = System.Diagnostics.Contracts;
 /// Build this project.  :)
 /// 
 /// Expected Results:
-/// Per section 2.3.1 of Code Contracts Specification:
-///     Invariants on automatic properties SHALL add Ensures/Requires
-///     to the corresponding Get/Set.
-/// Therefore, the expectation is that the Ensures/Requires
-/// corresponding to anything listed in a ContractInvariantMethod attributed
-/// function will be applied to the autoproperties, and thus inherited for
-/// any implementation.
+/// Contracts indirectly called via a ContractAbbreviator method are properly inherited.
 ///
 /// Actual Results:
 /// Code Contracts fails to detect / report any problems with the below code,
